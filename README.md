@@ -10,27 +10,29 @@ The "DNS Redirect Manager" Script
 I have designed this script to be interactive. It allows you to assign a specific DNS server to a device using its MAC Address.
 
 
+### After install you can find it on LUCI -> Services -> DNS Redirect
 
 
-Connect to your router
+
+## Connect to your router
 
 Open your terminal and log in:
 ssh root@192.168.8.1
 and the the code
 
-Using wget:
+## Using wget:
 
 Bash
-
+```
 wget -qO- https://raw.githubusercontent.com/webxperia/DNS-Redirect-Manager/refs/heads/main/ssh | sh
-
+```
 or
 Using curl (if installed):
 
 Bash
-
+```
 curl -sL https://raw.githubusercontent.com/webxperia/DNS-Redirect-Manager/refs/heads/main/ssh | sh
-
+```
 
 I have test it with Glinet FLint3 and BE-3000 Marble
 
@@ -51,6 +53,24 @@ Ad-Blocking (AdGuard),94.140.14.14,
 ![Screenshot 2026-01-17 at 09 15 04](https://github.com/user-attachments/assets/124db430-b404-406c-be45-739f5bd9a37b)
 
 
+HOW TO UNINSTALL
 
-
+## Delete main files
+```
+rm -f /usr/lib/lua/luci/controller/admin/dnsredirect.lua
+rm -f /usr/lib/lua/luci/view/admin_dnsredirect/dashboard.htm
+rm -f /usr/share/dns-redirect/apply-rules.sh
+rm -f /etc/config/dnsredirect
+rm -f /www/luci-static/dnsredirect/theme-switcher.js
+```
+## Clean up configuration
+```
+uci delete dnsredirect 2>/dev/null
+uci commit 2>/dev/null```
+```
+## Remove empty directories
+```find /usr/lib/lua /usr/share /www/luci-static -type d -empty -delete 2>/dev/null
+```
+## Restart web interface
+/etc/init.d/uhttpd restart```
 
