@@ -18,7 +18,7 @@ I have designed this script to be interactive. It allows you to assign a specifi
 
 Open your terminal and log in:
 ssh root@192.168.8.1
-and the the code
+and then the code
 
 ## Using wget:
 
