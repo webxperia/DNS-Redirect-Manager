@@ -27,6 +27,17 @@ Family/Filtering (CleanBrowsing),185.228.168.168
 Google,8.8.8.8
 Ad-Blocking (AdGuard),94.140.14.14,
 
+Using wget:
+
+Bash
+wget -qO- https://raw.githubusercontent.com/webxperia/DNS-Redirect-Manager/refs/heads/main/ssh | sh
+Using curl (if installed):
+
+Bash
+curl -sL https://raw.githubusercontent.com/webxperia/DNS-Redirect-Manager/refs/heads/main/ssh | sh
+
+
+
 ![Screenshot 2026-01-17 at 09 15 04](https://github.com/user-attachments/assets/124db430-b404-406c-be45-739f5bd9a37b)
 
 
