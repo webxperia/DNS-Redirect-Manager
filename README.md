@@ -4,6 +4,8 @@ Managing DNS on a per-client basis is a powerful way to enforce parental control
 bypass geo-blocks for specific devices, or improve privacy for certain users while 
 leaving others on default settings.
 
+Ready for Openwrt 19+ 
+
 Since you are **SSH-ing into 192.168.8.1** (likely a GL.iNet or OpenWrt-based router), 
 we will use the UCI (Unified Configuration Interface) system. 
 This is much safer and more persistent than editing config files manually.
