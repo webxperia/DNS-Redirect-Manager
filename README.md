@@ -35,7 +35,7 @@ Bash
 curl -sL https://raw.githubusercontent.com/webxperia/DNS-Redirect-Manager/refs/heads/main/ssh | sh
 ```
 
-I have test it with Glinet FLint3 and BE-3000 Marble
+I have **test** it with Gl.inet **FLint3** and **GL-B3000** (Marble)
 
 
 **Recomendation!**
