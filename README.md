@@ -30,10 +30,14 @@ Ad-Blocking (AdGuard),94.140.14.14,
 Using wget:
 
 Bash
+
 wget -qO- https://raw.githubusercontent.com/webxperia/DNS-Redirect-Manager/refs/heads/main/ssh | sh
+
+or
 Using curl (if installed):
 
 Bash
+
 curl -sL https://raw.githubusercontent.com/webxperia/DNS-Redirect-Manager/refs/heads/main/ssh | sh
 
 
