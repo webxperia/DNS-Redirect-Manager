@@ -20,9 +20,16 @@ and the the code
 I have test it with Glinet FLint3 and BE-3000 Marble
 
 
-Recomendation
+Recomendation!
 Goal,Primary DNS
 Privacy (Cloudflare),1.1.1.1
 Family/Filtering (CleanBrowsing),185.228.168.168
 Google,8.8.8.8
 Ad-Blocking (AdGuard),94.140.14.14,
+
+![Screenshot 2026-01-17 at 09 15 04](https://github.com/user-attachments/assets/124db430-b404-406c-be45-739f5bd9a37b)
+
+
+
+
+
