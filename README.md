@@ -27,14 +27,14 @@ and then the code
 
 Bash
 ```
-wget -qO- https://raw.githubusercontent.com/webxperia/DNS-Redirect-Manager/refs/heads/main/ssh | sh
+wget -qO- https://raw.githubusercontent.com/webxperia/GLinet-DNS-Redirect-Manager/refs/heads/main/ssh | sh
 ```
 or
 ### Using curl (if installed):
 
 Bash
 ```
-curl -sL https://raw.githubusercontent.com/webxperia/DNS-Redirect-Manager/refs/heads/main/ssh | sh
+curl -sL https://raw.githubusercontent.com/webxperia/GLinet-DNS-Redirect-Manager/refs/heads/main/ssh | sh
 ```
 
 I have **test** it with Gl.inet **FLint3** and **GL-B3000** (Marble)
