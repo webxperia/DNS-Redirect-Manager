@@ -1,6 +1,4 @@
 #!/bin/sh
-
-# Χρώματα για το τερματικό
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
@@ -28,7 +26,7 @@ do_install() {
     chmod -R 755 /usr/lib/lua/luci/view/admin_dnsredirect
     
     echo "╔══════════════════════════════════════════════╗"
-    echo "║   DNS Redirect Manager - Dark Mode Default   ║"
+    echo "║   Dark Mode Default   ║"
     echo "╚══════════════════════════════════════════════╝"
     echo ""
     
