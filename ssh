@@ -1,30 +1,53 @@
 #!/bin/sh
-# ============================================
-# DNS Redirect Manager - With In-App Theme Switcher
-# Light / Dark mode
-# ============================================
 
-echo "╔══════════════════════════════════════════════╗"
-echo "║   DNS Redirect Manager - Theme Switcher      ║"
-echo "╚══════════════════════════════════════════════╝"
-echo ""
+# Χρώματα για το τερματικό
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
 
-# 1. Create directories
-echo "📁 1. Creating directory structure..."
-mkdir -p /usr/lib/lua/luci/controller/admin
-mkdir -p /usr/lib/lua/luci/view/admin_dnsredirect
-mkdir -p /usr/share/dns-redirect
-mkdir -p /www/luci-static/dnsredirect
-echo "   ✅ Directories created"
+show_menu() {
+    clear
+    echo "=================================================="
+    echo "      DNS Redirect Manager - Setup Wizard"
+    echo "=================================================="
+    echo "1) Install / Update DNS Redirect Manager"
+    echo "2) Uninstall DNS Redirect Manager"
+    echo "3) Restart Services & Clear LuCI Cache"
+    echo "4) Exit to Terminal"
+    echo "=================================================="
+    printf "Please choose an option [1-4]: "
+}
 
-# 2. Install required packages
-echo "📦 2. Installing required packages..."
-opkg update >/dev/null 2>&1
-echo "   ✅ Packages checked"
-
-# 3. Create Controller (with theme support)
-echo "🎮 3. Creating controller..."
-cat > /usr/lib/lua/luci/controller/admin/dnsredirect.lua << 'EOF'
+do_install() {
+    echo "📁 Creating directory structure..."
+    mkdir -p /usr/lib/lua/luci/controller/admin
+    mkdir -p /usr/lib/lua/luci/view/admin_dnsredirect
+    mkdir -p /usr/share/dns-redirect
+    mkdir -p /www/luci-static/dnsredirect
+    chmod -R 755 /usr/lib/lua/luci/view/admin_dnsredirect
+    
+    echo "╔══════════════════════════════════════════════╗"
+    echo "║   DNS Redirect Manager - Dark Mode Default   ║"
+    echo "╚══════════════════════════════════════════════╝"
+    echo ""
+    
+    # 1. Create directories
+    echo "📁 1. Creating directory structure..."
+    mkdir -p /usr/lib/lua/luci/controller/admin
+    mkdir -p /usr/lib/lua/luci/view/admin_dnsredirect
+    mkdir -p /usr/share/dns-redirect
+    mkdir -p /www/luci-static/dnsredirect
+    echo "   ✅ Directories created"
+    
+    # 2. Install required packages
+    echo "📦 2. Installing required packages..."
+    opkg update >/dev/null 2>&1
+    echo "   ✅ Packages checked"
+    
+    # 3. Create Controller (with theme support)
+    echo "🎮 3. Creating controller..."
+    cat > /usr/lib/lua/luci/controller/admin/dnsredirect.lua << 'EOF'
 module("luci.controller.admin.dnsredirect", package.seeall)
 
 function index()
@@ -42,7 +65,7 @@ function action_status()
     local result = {
         success = true,
         rules = {},
-        global = {enabled = false, dns = "1.1.1.1", theme = "light"},
+        global = {enabled = false, dns = "1.1.1.1", theme = "dark"},
         counts = {total = 0, enabled = 0}
     }
     
@@ -68,7 +91,7 @@ function action_status()
     if global then
         result.global.enabled = (global.enabled == "1")
         result.global.dns = global.dns_server or "1.1.1.1"
-        result.global.theme = global.theme or "light"
+        result.global.theme = global.theme or "dark"
     end
     
     http.prepare_content("application/json")
@@ -127,7 +150,7 @@ function action_save()
         uci:set("dnsredirect", "settings", "global")
         uci:set("dnsredirect", "settings", "enabled", global_enabled or "0")
         uci:set("dnsredirect", "settings", "dns_server", global_dns or "1.1.1.1")
-        uci:set("dnsredirect", "settings", "theme", global_theme or "light")
+        uci:set("dnsredirect", "settings", "theme", global_theme or "dark")
     end
     
     uci:commit("dnsredirect")
@@ -153,14 +176,14 @@ function action_settheme()
     http.write_json({success = true, theme = theme})
 end
 EOF
-echo "   ✅ Controller created"
-
-# 4. Create Dashboard with Dynamic Theme Switcher INSIDE the card
-echo "📊 4. Creating dashboard with theme switcher inside card..."
-cat > /usr/lib/lua/luci/view/admin_dnsredirect/dashboard.htm << 'EOF'
+    echo "   ✅ Controller created"
+    
+    # 4. Create Dashboard with Enhanced Dark Mode
+    echo "📊 4. Creating dashboard with enhanced dark mode..."
+    cat > /usr/lib/lua/luci/view/admin_dnsredirect/dashboard.htm << 'EOF'
 <%+header%>
 <style>
-/* === LIGHT THEME (default) === */
+/* === LIGHT THEME === */
 body[data-theme="light"] {
     --bg-primary: #ffffff;
     --bg-secondary: #f8f9fa;
@@ -168,28 +191,42 @@ body[data-theme="light"] {
     --text-primary: #2c3e50;
     --text-secondary: #7f8c8d;
     --accent: #3498db;
+    --accent-light: #5dade2;
     --success: #27ae60;
+    --success-light: #2ecc71;
     --danger: #e74c3c;
+    --danger-light: #ec7063;
     --warning: #f39c12;
+    --warning-light: #f4d03f;
     --border: #dfe6e9;
+    --border-light: #e8f4fc;
     --shadow: rgba(0,0,0,0.08);
     --card-shadow: 0 4px 6px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08);
+    --input-bg: #ffffff;
+    --table-header: #f1f8ff;
 }
 
-/* === DARK THEME === */
+/* === DARK THEME (Enhanced) === */
 body[data-theme="dark"] {
-    --bg-primary: #1a1d29;
-    --bg-secondary: #252836;
-    --bg-tertiary: #2d3142;
-    --text-primary: #e4e6f0;
-    --text-secondary: #a0a4b8;
-    --accent: #6c8eff;
-    --success: #4cd964;
-    --danger: #ff6b6b;
-    --warning: #ffd166;
-    --border: #3a3f58;
-    --shadow: rgba(0,0,0,0.25);
-    --card-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.15);
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-tertiary: #21262d;
+    --text-primary: #f0f6fc;
+    --text-secondary: #8b949e;
+    --accent: #58a6ff;
+    --accent-light: #79c0ff;
+    --success: #238636;
+    --success-light: #2ea043;
+    --danger: #da3633;
+    --danger-light: #f85149;
+    --warning: #d29922;
+    --warning-light: #e3b341;
+    --border: #30363d;
+    --border-light: #3c444d;
+    --shadow: rgba(0,0,0,0.35);
+    --card-shadow: 0 8px 24px rgba(0,0,0,0.25), 0 4px 12px rgba(0,0,0,0.15);
+    --input-bg: #0d1117;
+    --table-header: #1a2129;
 }
 
 /* Theme Toggle Switch INSIDE CARD */
@@ -203,23 +240,23 @@ body[data-theme="dark"] {
 .theme-toggle {
     width: 56px;
     height: 28px;
-    background: var(--border);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
     border-radius: 28px;
     position: relative;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: 2px solid var(--accent);
     overflow: hidden;
     box-shadow: var(--card-shadow);
 }
 
 .theme-toggle:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 12px var(--shadow);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 16px var(--shadow);
 }
 
 .theme-toggle:active {
-    transform: translateY(0);
+    transform: translateY(0) scale(0.98);
 }
 
 .theme-toggle-icons {
@@ -241,26 +278,27 @@ body[data-theme="dark"] {
     justify-content: center;
     width: 16px;
     height: 16px;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
 }
 
 body[data-theme="light"] .sun-icon {
     color: #ff9f1c;
-    filter: drop-shadow(0 0 4px rgba(255, 159, 28, 0.6));
+    filter: drop-shadow(0 0 6px rgba(255, 159, 28, 0.8));
 }
 
 body[data-theme="dark"] .sun-icon {
-    color: var(--text-secondary);
-    opacity: 0.7;
+    color: #8b949e;
+    opacity: 0.6;
 }
 
 body[data-theme="light"] .moon-icon {
-    color: var(--text-secondary);
-    opacity: 0.7;
+    color: #8b949e;
+    opacity: 0.6;
 }
 
 body[data-theme="dark"] .moon-icon {
-    color: #6c8eff;
-    filter: drop-shadow(0 0 4px rgba(108, 142, 255, 0.6));
+    color: #f0f6fc;
+    filter: drop-shadow(0 0 6px rgba(240, 246, 252, 0.4));
 }
 
 .toggle-slider-round {
@@ -269,30 +307,31 @@ body[data-theme="dark"] .moon-icon {
     width: 22px;
     left: 3px;
     bottom: 3px;
-    background: var(--accent);
+    background: white;
     transition: .3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     border-radius: 50%;
     z-index: 1;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 body[data-theme="dark"] .toggle-slider-round {
     transform: translateX(28px);
-    background: #6c8eff;
+    background: linear-gradient(135deg, #f0f6fc 0%, #c9d1d9 100%);
 }
 
 /* Theme badge */
 .theme-badge {
     display: inline-block;
     margin-left: 10px;
-    padding: 2px 8px;
-    border-radius: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
     font-size: 11px;
-    font-weight: 600;
-    background: var(--accent);
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
     color: white;
     vertical-align: middle;
-    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* Main header with theme toggle */
@@ -325,25 +364,28 @@ body {
 
 .card {
     background: var(--bg-secondary);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 24px;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 28px;
     box-shadow: var(--card-shadow);
     border: 1px solid var(--border);
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
+    backdrop-filter: blur(10px);
 }
 
 .card:hover {
-    box-shadow: 0 8px 16px var(--shadow);
+    box-shadow: 0 12px 28px var(--shadow);
+    transform: translateY(-2px);
+    border-color: var(--accent);
 }
 
 .card-title {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
     border-bottom: 2px solid var(--border);
 }
 
@@ -351,33 +393,39 @@ h2, h3 {
     color: var(--accent) !important;
     margin-top: 0;
     margin-bottom: 5px;
+    font-weight: 700 !important;
 }
 
 h2 {
-    font-size: 24px !important;
+    font-size: 28px !important;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 h3 {
-    font-size: 18px !important;
+    font-size: 20px !important;
 }
 
 p {
     color: var(--text-secondary);
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 .subtitle {
     font-size: 14px;
     color: var(--text-secondary);
     margin-top: 5px;
+    opacity: 0.9;
 }
 
 /* Toggle switches */
 .toggle {
     position: relative;
     display: inline-block;
-    width: 52px;
-    height: 26px;
+    width: 60px;
+    height: 32px;
 }
 .toggle input {
     opacity: 0;
@@ -391,144 +439,161 @@ p {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: var(--border);
+    background: linear-gradient(135deg, var(--border) 0%, var(--border-light) 100%);
     transition: .4s;
-    border-radius: 26px;
+    border-radius: 32px;
 }
 .toggle-slider:before {
     position: absolute;
     content: "";
-    height: 20px;
-    width: 20px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: .4s;
+    height: 24px;
+    width: 24px;
+    left: 4px;
+    bottom: 4px;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+    transition: .4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 input:checked + .toggle-slider {
-    background-color: var(--success);
+    background: linear-gradient(135deg, var(--success) 0%, var(--success-light) 100%);
 }
 input:checked + .toggle-slider:before {
-    transform: translateX(26px);
+    transform: translateX(28px);
 }
 
 /* Buttons */
 .btn {
-    background: var(--accent);
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
+    padding: 12px 24px;
+    border-radius: 12px;
     cursor: pointer;
     font-weight: 600;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    box-shadow: 0 2px 4px var(--shadow);
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    font-size: 14px;
+    letter-spacing: 0.3px;
 }
 
 .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px var(--shadow);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
     filter: brightness(1.1);
 }
 
 .btn:active {
-    transform: translateY(0);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }
 
 .btn-danger {
-    background: var(--danger);
+    background: linear-gradient(135deg, var(--danger) 0%, var(--danger-light) 100%);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
 
 .btn-success {
-    background: var(--success);
+    background: linear-gradient(135deg, var(--success) 0%, var(--success-light) 100%);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
 }
 
 .btn-warning {
-    background: var(--warning);
+    background: linear-gradient(135deg, var(--warning) 0%, var(--warning-light) 100%);
     color: #1a1d29;
+    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
 }
 
 .btn-sm {
-    padding: 6px 12px;
+    padding: 8px 16px;
     font-size: 13px;
+    border-radius: 10px;
 }
 
 .btn-icon {
-    font-size: 14px;
+    font-size: 16px;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
 }
 
 /* Form elements */
 input[type="text"] {
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border);
+    background: var(--input-bg);
+    border: 2px solid var(--border);
     color: var(--text-primary);
-    padding: 10px 12px;
-    border-radius: 6px;
+    padding: 12px 16px;
+    border-radius: 10px;
     width: 100%;
-    margin-top: 5px;
-    transition: all 0.2s;
+    margin-top: 8px;
+    transition: all 0.3s;
     font-size: 14px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
 }
 
 input[type="text"]:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.15), inset 0 2px 4px rgba(0,0,0,0.1);
 }
 
 select {
-    background: var(--bg-tertiary);
+    background: var(--input-bg);
     color: var(--text-primary);
-    border: 1px solid var(--border);
-    padding: 10px 12px;
-    border-radius: 6px;
-    margin-top: 5px;
+    border: 2px solid var(--border);
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-top: 8px;
     font-size: 14px;
+    width: 100%;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
 }
 
 /* Tables */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 12px;
-    border-radius: 8px;
+    margin-top: 16px;
+    border-radius: 12px;
     overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 12px var(--shadow);
 }
 th {
-    background: var(--bg-tertiary);
-    padding: 14px 12px;
+    background: var(--table-header);
+    padding: 18px 16px;
     text-align: left;
     color: var(--accent);
     border-bottom: 2px solid var(--border);
-    font-weight: 600;
+    font-weight: 700;
     font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 td {
-    padding: 16px 12px;
+    padding: 20px 16px;
     border-bottom: 1px solid var(--border);
     font-size: 14px;
+    transition: background 0.2s;
 }
 tr:last-child td {
     border-bottom: none;
 }
 tr:hover td {
-    background: rgba(var(--accent-rgb), 0.05);
+    background: rgba(var(--accent-rgb), 0.08);
 }
 
 /* Code blocks */
 code {
     background: var(--bg-tertiary);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-family: 'Courier New', monospace;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
     font-size: 13px;
     border: 1px solid var(--border);
+    color: var(--accent);
 }
 
 /* Modal */
@@ -538,111 +603,173 @@ code {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.8);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(8px);
 }
 #rule-modal > div {
     background: var(--bg-secondary);
-    padding: 30px;
-    border-radius: 16px;
-    min-width: 420px;
+    padding: 32px;
+    border-radius: 20px;
+    min-width: 450px;
     border: 1px solid var(--border);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    box-shadow: 0 24px 48px rgba(0,0,0,0.4);
     max-width: 90%;
     max-height: 90%;
     overflow-y: auto;
+    animation: modalSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalSlide {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Status badges */
 .status-badge {
-    padding: 4px 10px;
+    padding: 6px 12px;
     border-radius: 20px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 .enabled-badge {
     background: rgba(39, 174, 96, 0.15);
     color: var(--success);
-    border: 1px solid rgba(39, 174, 96, 0.3);
+    border: 2px solid rgba(39, 174, 96, 0.3);
 }
 .disabled-badge {
     background: rgba(231, 76, 60, 0.15);
     color: var(--danger);
-    border: 1px solid rgba(231, 76, 60, 0.3);
+    border: 2px solid rgba(231, 76, 60, 0.3);
 }
 
 /* Rules stats */
 .rules-stats {
     display: flex;
-    gap: 15px;
-    margin-top: 10px;
+    gap: 16px;
+    margin-top: 16px;
     flex-wrap: wrap;
 }
 .stat-item {
     display: flex;
     flex-direction: column;
-    padding: 10px 15px;
+    padding: 16px 20px;
     background: var(--bg-tertiary);
-    border-radius: 8px;
+    border-radius: 12px;
     border: 1px solid var(--border);
-    min-width: 120px;
+    min-width: 140px;
+    transition: all 0.3s;
+    flex: 1;
+}
+.stat-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px var(--shadow);
+    border-color: var(--accent);
 }
 .stat-value {
-    font-size: 24px;
-    font-weight: bold;
+    font-size: 32px;
+    font-weight: 800;
     color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
 }
 .stat-label {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-secondary);
-    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
 }
 
 /* Form groups */
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 .form-group label {
     display: block;
-    margin-bottom: 6px;
-    font-weight: 500;
+    margin-bottom: 8px;
+    font-weight: 600;
     color: var(--text-primary);
+    font-size: 14px;
 }
 
 /* Action buttons container */
 .action-buttons {
     display: flex;
-    gap: 12px;
-    margin-top: 20px;
+    gap: 16px;
+    margin-top: 24px;
     flex-wrap: wrap;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
     .card {
-        padding: 16px;
+        padding: 20px;
     }
     
     .theme-toggle {
-        width: 48px;
-        height: 24px;
+        width: 52px;
+        height: 26px;
     }
     
     .toggle-slider-round {
-        height: 18px;
-        width: 18px;
+        height: 20px;
+        width: 20px;
     }
     
     body[data-theme="dark"] .toggle-slider-round {
-        transform: translateX(24px);
+        transform: translateX(26px);
     }
+    
+    .rules-stats {
+        flex-direction: column;
+    }
+    
+    .stat-item {
+        min-width: auto;
+    }
+}
+
+/* Glow effect for dark mode */
+body[data-theme="dark"] .btn {
+    box-shadow: 0 4px 20px rgba(88, 166, 255, 0.25);
+}
+
+body[data-theme="dark"] .btn:hover {
+    box-shadow: 0 8px 30px rgba(88, 166, 255, 0.4);
+}
+
+body[data-theme="dark"] .stat-item {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(33, 38, 45, 0.8) 100%);
+}
+
+body[data-theme="dark"] input[type="text"]:focus {
+    box-shadow: 0 0 0 4px rgba(88, 166, 255, 0.2), inset 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Loading animation */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.loading {
+    animation: pulse 1.5s infinite;
 }
 </style>
 
@@ -652,7 +779,7 @@ code {
         <div class="main-header">
             <div>
                 <h2>🌐 DNS Redirect Manager</h2>
-                <p class="subtitle">Manage DNS redirection for specific devices. Current theme: <span id="current-theme-badge" class="theme-badge">Light</span></p>
+                <p class="subtitle">Manage DNS redirection for specific devices. Current theme: <span id="current-theme-badge" class="theme-badge">Dark</span></p>
             </div>
             <div class="theme-toggle-container">
                 <div class="theme-toggle" onclick="toggleTheme()" title="Click to toggle theme (Ctrl+T)">
@@ -675,7 +802,7 @@ code {
                 <span class="stat-label">Active Rules</span>
             </div>
             <div class="stat-item">
-                <span class="stat-value" id="theme-indicator">☀️</span>
+                <span class="stat-value" id="theme-indicator">🌙</span>
                 <span class="stat-label">Theme</span>
             </div>
         </div>
@@ -762,7 +889,7 @@ code {
 
 <script>
 let rules = [];
-let currentTheme = 'light';
+let currentTheme = 'dark';
 
 // Theme toggle function
 function toggleTheme() {
@@ -800,7 +927,7 @@ function refresh() {
     fetch('<%=url("admin/services/dnsredirect/status")%>')
         .then(r => r.json())
         .then(data => {
-            const theme = data.global.theme || 'light';
+            const theme = data.global.theme || 'dark';
             if (theme !== currentTheme) {
                 switchTheme(theme);
             }
@@ -1157,12 +1284,27 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
-// Initial load
-refresh();
+// Initial load - force dark theme on first load
+window.addEventListener('DOMContentLoaded', function() {
+    // Set dark theme as default
+    document.body.setAttribute('data-theme', 'dark');
+    currentTheme = 'dark';
+    
+    // Update UI elements
+    const badge = document.getElementById('current-theme-badge');
+    if (badge) badge.textContent = 'Dark';
+    
+    const indicator = document.getElementById('theme-indicator');
+    if (indicator) indicator.textContent = '🌙';
+    
+    // Then refresh data
+    setTimeout(refresh, 100);
+});
 
 // Add helpful console message
 setTimeout(() => {
     console.log('🎨 DNS Redirect Manager loaded!');
+    console.log('🎯 Dark mode is now default');
     console.log('💡 Keyboard shortcuts:');
     console.log('   • Ctrl+T: Toggle theme');
     console.log('   • Ctrl+N: New rule');
@@ -1172,11 +1314,11 @@ setTimeout(() => {
 </script>
 <%+footer%>
 EOF
-echo "   ✅ Dashboard created with theme switcher inside card"
-
-# 5. Create Apply Script (unchanged)
-echo "⚡ 5. Creating apply script..."
-cat > /usr/share/dns-redirect/apply-rules.sh << 'EOF'
+    echo "   ✅ Dashboard created with enhanced dark mode"
+    
+    # 5. Create Apply Script
+    echo "⚡ 5. Creating apply script..."
+    cat > /usr/share/dns-redirect/apply-rules.sh << 'EOF'
 #!/bin/sh
 # DNS Redirect Apply Script
 
@@ -1225,48 +1367,31 @@ uci commit firewall
 
 echo "DNS redirect rules applied successfully!"
 EOF
-
-chmod +x /usr/share/dns-redirect/apply-rules.sh
-echo "   ✅ Apply script created"
-
-# 6. Create Configuration File (with default theme)
-echo "⚙️ 6. Creating configuration file..."
-cat > /etc/config/dnsredirect << 'EOF'
+    
+    chmod +x /usr/share/dns-redirect/apply-rules.sh
+    echo "   ✅ Apply script created"
+    
+    # 6. Create Configuration File (with dark mode as default)
+    echo "⚙️ 6. Creating configuration file..."
+    cat > /etc/config/dnsredirect << 'EOF'
 config global 'settings'
     option enabled '0'
     option dns_server '1.1.1.1'
-    option theme 'light'
+    option theme 'dark'
 EOF
-echo "   ✅ Configuration file created"
-
-# 7. Create theme helper script
-echo "🎨 7. Creating theme helper..."
-cat > /www/luci-static/dnsredirect/theme-switcher.js << 'EOF'
-// DNS Redirect Theme Switcher
+    echo "   ✅ Configuration file created with dark mode as default"
+    
+    # 7. Create theme helper script with dark mode default
+    echo "🎨 7. Creating theme helper..."
+    cat > /www/luci-static/dnsredirect/theme-switcher.js << 'EOF'
+// DNS Redirect Theme Switcher - Dark Mode Default
 (function() {
     'use strict';
     
-    // Load saved theme
-    function loadTheme() {
-        try {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', '/cgi-bin/luci/admin/services/dnsredirect/status', false);
-            xhr.send();
-            if (xhr.status === 200) {
-                const data = JSON.parse(xhr.responseText);
-                return data.global?.theme || 'light';
-            }
-        } catch (e) {
-            console.log('DNS Redirect: Could not load theme:', e);
-        }
-        return 'light';
-    }
-    
-    // Apply theme to body
-    document.addEventListener('DOMContentLoaded', function() {
-        const theme = loadTheme();
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('dnsredirect-theme', theme);
+    // Apply dark theme as default
+    function applyDarkTheme() {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('dnsredirect-theme', 'dark');
         
         // Add smooth transitions
         const style = document.createElement('style');
@@ -1279,48 +1404,108 @@ cat > /www/luci-static/dnsredirect/theme-switcher.js << 'EOF'
             }
         `;
         document.head.appendChild(style);
+    }
+    
+    // Apply theme on DOM ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // Force dark theme first
+        applyDarkTheme();
+        
+        // Then try to load saved theme (but dark is default)
+        try {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '/cgi-bin/luci/admin/services/dnsredirect/status', false);
+            xhr.send();
+            if (xhr.status === 200) {
+                const data = JSON.parse(xhr.responseText);
+                const savedTheme = data.global?.theme;
+                if (savedTheme === 'light') {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('dnsredirect-theme', 'light');
+                }
+            }
+        } catch (e) {
+            console.log('DNS Redirect: Could not load theme:', e);
+            // Keep dark theme as default
+        }
     });
     
     // Sync theme across tabs
     window.addEventListener('storage', function(e) {
         if (e.key === 'dnsredirect-theme') {
-            document.documentElement.setAttribute('data-theme', e.newValue);
+            document.documentElement.setAttribute('data-theme', e.newValue || 'dark');
         }
     });
 })();
 EOF
-echo "   ✅ Theme helper created"
+    echo "   ✅ Theme helper created with dark mode default"
+    
+    # 8. Restart Services
+    echo "🔄 8. Restarting services..."
+    /etc/init.d/uhttpd restart >/dev/null 2>&1
+    sleep 2
+    
+    echo ""
+    echo "╔══════════════════════════════════════════════╗"
+    echo "║          INSTALLATION COMPLETE! 🎉         ║"
+    echo "╚══════════════════════════════════════════════╝"
+    echo ""
+    echo "✨ Enhanced Dark Mode Features:"
+    echo "   • 🌙 Dark mode as DEFAULT theme"
+    echo "   • Enhanced dark colors (GitHub Dark theme inspired)"
+    echo "   • Better gradients and shadows"
+    echo "   • Smooth animations and transitions"
+    echo "   • Glow effects for buttons in dark mode"
+    echo "   • Enhanced form elements with better contrast"
+    echo "   • Responsive design improvements"
+    echo "   • Premium dark theme aesthetics"
+    echo ""
+    echo "🎯 Theme switcher is now inside the 'DNS Redirect Manager' card"
+    echo "   at the top-right corner - Click to switch between dark/light!"
+    echo ""
+    echo "Access: LuCI → Services → DNS Redirect"
+    echo ""
+    echo "📁 Files installed:"
+    echo "  • /usr/lib/lua/luci/controller/admin/dnsredirect.lua"
+    echo "  • /usr/lib/lua/luci/view/admin_dnsredirect/dashboard.htm"
+    echo "  • /usr/share/dns-redirect/apply-rules.sh"
+    echo "  • /etc/config/dnsredirect (dark mode default)"
+    echo "  • /www/luci-static/dnsredirect/theme-switcher.js"
+    echo ""
+    echo "🔄 Refresh LuCI page if menu doesn't appear immediately."
+    
+    do_restart
+    echo -e "${GREEN}✅ Installation Complete!${NC}"
+    read -p "Press Enter to return to menu..." temp
+}
 
-# 8. Restart Services
-echo "🔄 8. Restarting services..."
-/etc/init.d/uhttpd restart >/dev/null 2>&1
-sleep 2
+do_uninstall() {
+    echo -e "${RED}🗑️ Uninstalling...${NC}"
+    rm -rf /usr/lib/lua/luci/view/admin_dnsredirect
+    rm -f /usr/lib/lua/luci/controller/admin/dnsredirect.lua
+    rm -rf /usr/share/dns-redirect
+    rm -rf /www/luci-static/dnsredirect
+    rm -f /etc/config/dnsredirect
+    do_restart
+    echo -e "${GREEN}✅ Uninstalled successfully.${NC}"
+    read -p "Press Enter to return to menu..." temp
+}
 
-echo ""
-echo "╔══════════════════════════════════════════════╗"
-echo "║          INSTALLATION COMPLETE! 🎉         ║"
-echo "╚══════════════════════════════════════════════╝"
-echo ""
-echo "✨ New Features:"
-echo "   • ☀️/🌙 Theme toggle INSIDE the main card (top-right)"
-echo "   • One-click theme switching"
-echo "   • Theme badge showing current mode"
-echo "   • Stats dashboard with rules count"
-echo "   • Enhanced visual design with smooth transitions"
-echo "   • Keyboard shortcuts (Ctrl+T, Ctrl+N, F5, Escape)"
-echo "   • Better form validation"
-echo "   • Export/Import buttons (stub functions)"
-echo ""
-echo "🎯 Theme switcher is now inside the 'DNS Redirect Manager' card"
-echo "   at the top-right corner, integrated with the header!"
-echo ""
-echo "Access: LuCI → Services → DNS Redirect"
-echo ""
-echo "📁 Files installed:"
-echo "  • /usr/lib/lua/luci/controller/admin/dnsredirect.lua"
-echo "  • /usr/lib/lua/luci/view/admin_dnsredirect/dashboard.htm"
-echo "  • /usr/share/dns-redirect/apply-rules.sh"
-echo "  • /etc/config/dnsredirect"
-echo "  • /www/luci-static/dnsredirect/theme-switcher.js"
-echo ""
-echo "🔄 Refresh LuCI page if menu doesn't appear immediately."
+do_restart() {
+    echo -e "${YELLOW}🔄 Cleaning cache & restarting uhttpd...${NC}"
+    rm -rf /tmp/luci-indexcache /tmp/luci-modulecache/
+    /etc/init.d/uhttpd restart
+}
+
+# Main Loop
+while true; do
+    show_menu
+    read choice
+    case $choice in
+        1) do_install ;;
+        2) do_uninstall ;;
+        3) do_restart; read -p "Done. Press Enter..." temp ;;
+        4) exit 0 ;;
+        *) echo "Invalid option"; sleep 1 ;;
+    esac
+done
